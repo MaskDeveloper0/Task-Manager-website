@@ -1,96 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Modern Task Manager</title>
+<meta charset="UTF-8">
+<title>Modern Task Manager</title>
 
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial;
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
-            padding: 16px;
-        }
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
 
-        .container {
-            max-width: 800px;
-            margin: auto;
-        }
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
 
-        h1 {
-            text-align: center;
-            color: white;
-        }
+h1 {
+    text-align: center;
+    color: white;
+}
 
-        .input-section {
-            display: flex;
-            gap: 8px;
-        }
+.top-bar {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 
-        input, button, select {
-            padding: 10px;
-            border-radius: 6px;
-            border: none;
-        }
+input, select, button {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+}
 
-        button {
-            background: orange;
-            cursor: pointer;
-        }
+button {
+    background: orange;
+    cursor: pointer;
+    font-weight: bold;
+}
 
-        table {
-            width: 100%;
-            margin-top: 16px;
-            color: white;
-        }
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background: rgba(255,255,255,0.1);
+}
 
-        .chart-container {
-            margin-top: 25px;
-            background: rgba(255,255,255,0.2);
-            padding: 10px;
-            border-radius: 10px;
-        }
-    </style>
+th, td {
+    padding: 10px;
+    text-align: center;
+    color: white;
+}
+
+th {
+    background: rgba(0,0,0,0.2);
+}
+
+.action-btn {
+    margin: 2px;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+.done { background: green; color: white; }
+.delete { background: red; color: white; }
+.edit { background: blue; color: white; }
+
+.chart-section {
+    margin-top: 30px;
+    background: rgba(255,255,255,0.15);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+canvas {
+    max-width: 400px !important;
+}
+</style>
 </head>
+
 <body>
 
 <div class="container">
 
-    <h1>Modern Task Manager</h1>
+<h1>Modern Task Manager</h1>
 
-    <div class="input-section">
-        <input type="text" id="taskInput" placeholder="Enter task">
-        <button onclick="addTask()">Add</button>
-    </div>
+<div class="top-bar">
+    <input type="text" id="taskInput" placeholder="Enter task">
+    <input type="datetime-local" id="taskTime">
+    <button onclick="addTask()">Add</button>
 
     <select id="filterSpinner" onchange="renderTasks()">
         <option value="all">All</option>
         <option value="completed">Completed</option>
         <option value="pending">Pending</option>
     </select>
+</div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Task</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="taskTable"></tbody>
-    </table>
+<table>
+<thead>
+<tr>
+    <th>Task</th>
+    <th>Time</th>
+    <th>Status</th>
+    <th>Action</th>
+</tr>
+</thead>
+<tbody id="taskTable"></tbody>
+</table>
 
+<div class="chart-section">
     <select id="chartTypeSpinner" onchange="updateChart()">
         <option value="pie">Pie Chart</option>
         <option value="bar">Bar Chart</option>
     </select>
-
-    <div class="chart-container">
-        <canvas id="myChart"></canvas>
-    </div>
+    <canvas id="myChart"></canvas>
+</div>
 
 </div>
 
@@ -99,11 +129,15 @@ let tasks = [];
 let chart;
 
 function addTask() {
-    const input = document.getElementById("taskInput");
-    if (input.value.trim() === "") return;
+    let text = document.getElementById("taskInput").value;
+    let time = document.getElementById("taskTime").value;
 
-    tasks.push({ text: input.value, completed: false });
-    input.value = "";
+    if (text.trim() === "") return;
+
+    tasks.push({ text, time, completed: false });
+    
+    document.getElementById("taskInput").value = "";
+    document.getElementById("taskTime").value = "";
 
     renderTasks();
     updateChart();
@@ -121,9 +155,19 @@ function deleteTask(i) {
     updateChart();
 }
 
+function editTask(i) {
+    let newText = prompt("Edit task:", tasks[i].text);
+    let newTime = prompt("Edit time (YYYY-MM-DDTHH:MM):", tasks[i].time);
+
+    if (newText !== null) tasks[i].text = newText;
+    if (newTime !== null) tasks[i].time = newTime;
+
+    renderTasks();
+}
+
 function renderTasks() {
-    const table = document.getElementById("taskTable");
-    const filter = document.getElementById("filterSpinner").value;
+    let table = document.getElementById("taskTable");
+    let filter = document.getElementById("filterSpinner").value;
 
     table.innerHTML = "";
 
@@ -132,37 +176,42 @@ function renderTasks() {
         if (filter === "pending" && t.completed) return;
 
         table.innerHTML += `
-            <tr>
-                <td>${t.text}</td>
-                <td>${t.completed ? "Done" : "Pending"}</td>
-                <td>
-                    <button onclick="toggleTask(${i})">✔</button>
-                    <button onclick="deleteTask(${i})">❌</button>
-                </td>
-            </tr>
-        `;
+        <tr>
+            <td>${t.text}</td>
+            <td>${t.time || "No time"}</td>
+            <td>${t.completed ? "Completed" : "Pending"}</td>
+            <td>
+                <button class="action-btn done" onclick="toggleTask(${i})">✔</button>
+                <button class="action-btn edit" onclick="editTask(${i})">✏️</button>
+                <button class="action-btn delete" onclick="deleteTask(${i})">✖</button>
+            </td>
+        </tr>`;
     });
 }
 
 function updateChart() {
-    const completed = tasks.filter(t => t.completed).length;
-    const pending = tasks.length - completed;
+    let completed = tasks.filter(t => t.completed).length;
+    let pending = tasks.length - completed;
 
-    const type = document.getElementById("chartTypeSpinner").value;
+    let type = document.getElementById("chartTypeSpinner").value;
 
     if (chart) chart.destroy();
 
-    const ctx = document.getElementById("myChart");
-
-    chart = new Chart(ctx, {
+    chart = new Chart(document.getElementById("myChart"), {
         type: type,
         data: {
             labels: ["Completed", "Pending"],
             datasets: [{
-                label: "Tasks",
                 data: [completed, pending],
                 backgroundColor: ["green", "red"]
             }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    labels: { color: "white" }
+                }
+            }
         }
     });
 }
