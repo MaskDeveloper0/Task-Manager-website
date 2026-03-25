@@ -14,7 +14,7 @@ body {
 }
 
 .container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: auto;
     padding: 20px;
 }
@@ -24,6 +24,7 @@ h1 {
     color: white;
 }
 
+/* Top Bar */
 .top-bar {
     display: flex;
     gap: 10px;
@@ -43,6 +44,7 @@ button {
     font-weight: bold;
 }
 
+/* Table */
 table {
     width: 100%;
     margin-top: 20px;
@@ -70,6 +72,7 @@ th {
 .delete { background: red; color: white; }
 .edit { background: blue; color: white; }
 
+/* Chart */
 .chart-section {
     margin-top: 30px;
     background: rgba(255,255,255,0.15);
@@ -92,7 +95,10 @@ canvas {
 
 <div class="top-bar">
     <input type="text" id="taskInput" placeholder="Enter task">
-    <input type="datetime-local" id="taskTime">
+
+    <input type="datetime-local" id="startTime">
+    <input type="datetime-local" id="endTime">
+
     <button onclick="addTask()">Add</button>
 
     <select id="filterSpinner" onchange="renderTasks()">
@@ -106,7 +112,8 @@ canvas {
 <thead>
 <tr>
     <th>Task</th>
-    <th>Time</th>
+    <th>Start Time</th>
+    <th>End Time</th>
     <th>Status</th>
     <th>Action</th>
 </tr>
@@ -130,14 +137,22 @@ let chart;
 
 function addTask() {
     let text = document.getElementById("taskInput").value;
-    let time = document.getElementById("taskTime").value;
+    let start = document.getElementById("startTime").value;
+    let end = document.getElementById("endTime").value;
 
     if (text.trim() === "") return;
 
-    tasks.push({ text, time, completed: false });
-    
+    // validation
+    if (start && end && start > end) {
+        alert("End time must be after start time!");
+        return;
+    }
+
+    tasks.push({ text, start, end, completed: false });
+
     document.getElementById("taskInput").value = "";
-    document.getElementById("taskTime").value = "";
+    document.getElementById("startTime").value = "";
+    document.getElementById("endTime").value = "";
 
     renderTasks();
     updateChart();
@@ -157,10 +172,17 @@ function deleteTask(i) {
 
 function editTask(i) {
     let newText = prompt("Edit task:", tasks[i].text);
-    let newTime = prompt("Edit time (YYYY-MM-DDTHH:MM):", tasks[i].time);
+    let newStart = prompt("Edit start time:", tasks[i].start);
+    let newEnd = prompt("Edit end time:", tasks[i].end);
+
+    if (newStart && newEnd && newStart > newEnd) {
+        alert("Invalid time range!");
+        return;
+    }
 
     if (newText !== null) tasks[i].text = newText;
-    if (newTime !== null) tasks[i].time = newTime;
+    if (newStart !== null) tasks[i].start = newStart;
+    if (newEnd !== null) tasks[i].end = newEnd;
 
     renderTasks();
 }
@@ -178,7 +200,8 @@ function renderTasks() {
         table.innerHTML += `
         <tr>
             <td>${t.text}</td>
-            <td>${t.time || "No time"}</td>
+            <td>${t.start || "-"}</td>
+            <td>${t.end || "-"}</td>
             <td>${t.completed ? "Completed" : "Pending"}</td>
             <td>
                 <button class="action-btn done" onclick="toggleTask(${i})">✔</button>
