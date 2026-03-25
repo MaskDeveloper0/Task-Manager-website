@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Modern Task Manager</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 16px;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-section input {
+            flex: 0.8;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+        }
+
+        .input-section button {
+            flex: 0.2;
+            background: #ff9800;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        select {
+            width: 100%;
+            margin-top: 16px;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 16px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        th {
+            background: rgba(0,0,0,0.2);
+        }
+
+        .chart-container {
+            margin-top: 25px;
+            height: 300px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Title -->
+    <h1>Modern Task Manager</h1>
+
+    <!-- Input Section -->
+    <div class="input-section">
+        <input type="text" placeholder="Enter new task..." id="taskInput">
+        <button id="addTaskButton">Add</button>
+    </div>
+
+    <!-- Task Filter Dropdown -->
+    <select id="filterSpinner">
+        <option>All Tasks</option>
+        <option>Completed</option>
+        <option>Pending</option>
+    </select>
+
+    <!-- Tasks Table -->
+    <table id="taskTable">
+        <thead>
+            <tr>
+                <th>Task</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamic rows will be added using JavaScript -->
+        </tbody>
+    </table>
+
+    <!-- Chart Dropdown -->
+    <select id="chartTypeSpinner">
+        <option>Pie Chart</option>
+        <option>Bar Chart</option>
+    </select>
+
+    <!-- Chart Container -->
+    <div class="chart-container" id="chartContainer">
+        <!-- Chart will be rendered here -->
+    </div>
+
+</div>
+
+</body>
+</html>
